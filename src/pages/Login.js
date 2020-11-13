@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { signin, signInWithGoogle, signInWithGitHub } from "../helpers/auth";
-
+import style from './Login.module.scss'
 export default class Login extends Component {
   constructor(props) {
     super(props);
@@ -32,8 +32,9 @@ export default class Login extends Component {
 
   render() {
     return (
-      <div>
+      <div className={style.background}>
         <form
+          className={style.form}
           autoComplete="off"
           onSubmit={this.handleSubmit}
         >
