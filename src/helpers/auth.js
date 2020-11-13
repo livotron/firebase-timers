@@ -9,7 +9,7 @@ export function signin(email, password) {
 }
 
 export function signout(){
-
+    db.goOffline();
     auth().signOut();
 }
 
