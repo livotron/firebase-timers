@@ -38,18 +38,12 @@ export default class Login extends Component {
           autoComplete="off"
           onSubmit={this.handleSubmit}
         >
-          <h1>
-            Login to
-            <Link to="/">
-              Chatty
-            </Link>
+          <h1 className={style.header}>
+            Login
           </h1>
-          <p>
-            Fill in the form below to login to your account.
-          </p>
-          <div>
-            <input
-              placeholder="Email"
+          <div className={style.inputBlock}>
+            <span className={style.label}>Email</span>
+            <input className={style.inputField}
               name="email"
               type="email"
               onChange={this.handleChange}
