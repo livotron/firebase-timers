@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { auth } from "../services/firebase/firebase";
 import { db } from "../services/firebase/firebase"
-import firebase from 'firebase';
 
 export default class Clock extends Component {
   constructor(props) {
@@ -12,8 +11,8 @@ export default class Clock extends Component {
       content: '',
       readError: null,
       writeError: null,
-      seconds: "00",
-      minutes: "00"
+      seconds: 0,
+      minutes: 0
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -35,14 +34,28 @@ export default class Clock extends Component {
       this.setState({ readError: error.message });
     }
     try{
-      db.ref("/status/" + this.state.user.uid).once('value', snapshot => {
+      db.ref("/status/" + this.state.user.uid).on('value', snapshot => {
         console.log("From clock component " + snapshot.val().total_time)
-        let totalTime = new Date(snapshot.val().total_time);
-        console.log(totalTime.getTime() / 1000)
+        console.log(snapshot.val().total_time / 1000)
+        this.setState( {seconds: Math.floor(snapshot.val().total_time / 1000) % 60,
+          minutes: Math.floor(snapshot.val().total_time / 1000 / 60) % 60})
       })
     } catch (error) {
       this.setState({ readError: error.message });
     }
+    setInterval(() => {
+      if (this.state.seconds === 59) {
+        this.setState({
+          minutes: this.state.minutes + 1,
+          seconds: 0
+        })
+      } else {
+        this.setState({
+          seconds: this.state.seconds + 1
+        })
+      }
+
+    }, 1000)
     // this.setState({seconds:})
   }
 
@@ -79,8 +92,7 @@ export default class Clock extends Component {
           {this.state.chats.map(chat => {
             return <p key={chat.timestamp}>{chat.content}</p>
           })}
-        </div>
-        {/* {# message form #} */}
+        </div><h1>{this.state.minutes + " : " + this.state.seconds}</h1>
         <form onSubmit={this.handleSubmit}>
           <input onChange={this.handleChange} value={this.state.content}></input>
           {this.state.error ? <p>{this.state.writeError}</p> : null}

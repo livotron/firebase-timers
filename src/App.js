@@ -43,8 +43,7 @@ class App extends Component {
     super();
     this.state = {
       authenticated: false,
-      loading: true,
-      totalTime: 0
+      loading: true
     };
   }
 
@@ -69,32 +68,26 @@ class App extends Component {
 
           try {
             userStatusDatabaseRef.once('value', snapshot => {
-              let lastStatus = snapshot.val();
+              let lastStatus = snapshot.val() || {total_time: 0, last_leave: + Date.now(), last_entry: + Date.now()};
               console.log("Got Last status ", lastStatus);
               let isOfflineForDatabase = {
                 state: 'offline',
                 last_changed: firebase.database.ServerValue.TIMESTAMP,
                 total_time: (lastStatus.total_time || 0) + lastStatus.last_leave - lastStatus.last_entry,
-                last_entry:  + Date.now(),
+                last_entry: + Date.now(),
                 last_leave: firebase.database.ServerValue.TIMESTAMP,
               };
               let isOnlineForDatabase = {
                 state: 'online',
                 last_changed: firebase.database.ServerValue.TIMESTAMP,
                 total_time: (lastStatus.total_time || 0) + lastStatus.last_leave - lastStatus.last_entry,
-                last_entry:  + Date.now(),
+                last_entry: + Date.now(),
                 last_leave: lastStatus.last_leave || firebase.database.ServerValue.TIMESTAMP,
               };
               console.log("set on disconnect")
               userStatusDatabaseRef.onDisconnect().set(isOfflineForDatabase).then(() => {
 
-                console.log("set online")
                 userStatusDatabaseRef.set(isOnlineForDatabase)
-                this.setState({totalTime: isOnlineForDatabase.total_time / 1000})
-                console.log("last session" , (lastStatus.last_leave - lastStatus.last_entry)/1000)
-                // console.log(lastStatus.last_leave.toDate())
-                // setInterval(myTimer, 1000);
-
               })
             })
           } catch (error) {
@@ -111,17 +104,13 @@ class App extends Component {
         });
       }
     })
-    setInterval(() => {
-      this.setState({ totalTime: this.state.totalTime + 1})
-    }, 1000)
-
   }
 
   render() {
     return (
       <div>
-        <Header>      
-</Header>  {this.state.totalTime}
+        <Header>
+        </Header>
         {this.state.loading === true ? <h2>Loading...</h2> :
           <Router>
             <Switch>
