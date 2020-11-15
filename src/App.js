@@ -7,6 +7,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import { auth, db } from './services/firebase/firebase';
 import firebase from 'firebase';
+import { PrivateRoute, PublicRoute } from './helpers/auth'
 import {
   Route,
   BrowserRouter as Router,
@@ -15,28 +16,6 @@ import {
 } from "react-router-dom";
 import { Component } from 'react';
 // import { db } from "./services/firebase/firebase"
-
-function PrivateRoute({ component: Component, authenticated, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      render={(props) => authenticated === true
-        ? <Component {...props} />
-        : <Redirect to={{ pathname: '/login', state: { from: props.location } }} />}
-    />
-  )
-}
-
-export function PublicRoute({ component: Component, authenticated, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      render={(props) => authenticated === false
-        ? <Component {...props} />
-        : <Redirect to='/clock' />}
-    />
-  )
-}
 
 class App extends Component {
   constructor() {
@@ -56,7 +35,7 @@ class App extends Component {
           loading: false,
         });
         db.goOnline();
-        let userStatusDatabaseRef = db.ref('/status/' + user.uid);
+        let userStatusDatabaseRef = db.ref('/statusWeb/' + user.uid);
 
 
 
@@ -71,14 +50,14 @@ class App extends Component {
               let lastStatus = snapshot.val() || {total_time: 0, last_leave: + Date.now(), last_entry: + Date.now()};
               console.log("Got Last status ", lastStatus);
               let isOfflineForDatabase = {
-                state: 'offline',
+                isOnline: false,
                 last_changed: firebase.database.ServerValue.TIMESTAMP,
-                total_time: (lastStatus.total_time || 0) + lastStatus.last_leave - lastStatus.last_entry,
+                total_time: lastStatus.total_time + lastStatus.last_leave - lastStatus.last_entry,
                 last_entry: + Date.now(),
                 last_leave: firebase.database.ServerValue.TIMESTAMP,
               };
               let isOnlineForDatabase = {
-                state: 'online',
+                isOnline: true,
                 last_changed: firebase.database.ServerValue.TIMESTAMP,
                 total_time: (lastStatus.total_time || 0) + lastStatus.last_leave - lastStatus.last_entry,
                 last_entry: + Date.now(),
